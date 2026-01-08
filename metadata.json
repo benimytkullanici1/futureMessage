@@ -1,0 +1,5 @@
+{
+  "name": "Süreli ve Şifreli Mesaj Görüntüleyici",
+  "description": "Dinamik URL parametrelerine dayalı, belirli tarihlerde veya şifre ile açılabilen güvenli mesaj görüntüleme uygulaması.",
+  "requestFramePermissions": []
+}

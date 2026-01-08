@@ -22,9 +22,15 @@
             background-color: #f8fafc; 
             margin: 0; 
             padding: 0; 
+            -webkit-font-smoothing: antialiased;
         }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Özel Kaydırma Çubuğu */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 <script type="importmap">
 {
@@ -57,17 +63,21 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    console.error("Google API Yanıtı:", data);
-                    
                     if (response.status === 403) {
-                        // Kullanıcının şüphelendiği durum için özel uyarı
-                        throw new Error("Erişim Engellendi (403): Google Cloud Console'da 'HTTP Referrers' kısmına sitenizin sonuna yıldız eklediğinizden emin olun. Örn: .../futureMessage/*");
+                        const reason = data.error?.message || "";
+                        let customMsg = "Erişim Reddedildi (403). ";
+                        if (reason.includes("referer")) {
+                            customMsg += "Tarayıcınızın gönderdiği adres Google Cloud kısıtlamalarıyla eşleşmiyor.";
+                        } else {
+                            customMsg += "API Anahtarı veya Tablo izinlerini kontrol edin.";
+                        }
+                        throw { message: customMsg, status: 403, raw: data };
                     }
-                    throw new Error(data.error?.message || "Google Sheets erişim hatası.");
+                    throw { message: data.error?.message || "Beklenmedik bir hata oluştu.", status: response.status, raw: data };
                 }
 
                 if (!data.values || !data.values[0]) {
-                    throw new Error(`Tablonun ${row}. satırı boş.`);
+                    throw { message: `Tablonun ${row}. satırı boş veya mesaj sütunu bulunamadı.`, status: 404 };
                 }
                 return data.values[0][0];
             } catch (err) {
@@ -80,7 +90,8 @@
             const [view, setView] = useState('loading');
             const [config, setConfig] = useState(null);
             const [message, setMessage] = useState('');
-            const [error, setError] = useState('');
+            const [error, setError] = useState(null);
+            const [showDebug, setShowDebug] = useState(false);
 
             useEffect(() => {
                 const init = () => {
@@ -88,7 +99,7 @@
                     const d = params.get('d');
                     
                     if (!d) {
-                        setError("Parametre (d) bulunamadı. Lütfen size iletilen linkin tamamını kullanın.");
+                        setError({ message: "Link eksik görünüyor. Lütfen tam adresi kullandığınızdan emin olun." });
                         setView('error');
                         return;
                     }
@@ -98,7 +109,7 @@
                         const [dateStr, secret, rowStr] = decoded.split(',');
                         const row = parseInt(rowStr);
                         
-                        if (isNaN(row)) throw new Error("Satır numarası geçersiz.");
+                        if (isNaN(row)) throw new Error("Satır bilgisi hatalı.");
 
                         const dateParts = dateStr.split('.');
                         const targetDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
@@ -114,7 +125,7 @@
                             setView('locked');
                         }
                     } catch (e) {
-                        setError("Link verisi çözülemedi. Hata: " + e.message);
+                        setError({ message: "Link içeriği okunamadı: " + e.message });
                         setView('error');
                     }
                 };
@@ -128,7 +139,7 @@
                     setMessage(msg);
                     setView('unlocked');
                 } catch (e) {
-                    setError(e.message);
+                    setError(e);
                     setView('error');
                 }
             };
@@ -137,7 +148,7 @@
                 if (input.trim() === config.secret.trim()) {
                     loadMessage(config.row);
                 } else {
-                    alert("Şifre hatalı, lütfen tekrar deneyin.");
+                    alert("Şifre hatalı!");
                 }
             };
 
@@ -146,50 +157,73 @@
                     <div className="w-full max-w-2xl flex flex-col items-center">
                         
                         {view === 'loading' && (
-                            <div className="text-center animate-pulse">
-                                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                <p className="text-slate-400 font-medium">Veriler yükleniyor...</p>
+                            <div className="text-center">
+                                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Bağlanılıyor...</p>
                             </div>
                         )}
 
                         {view === 'locked' && (
-                            <div className="w-full max-w-md bg-white p-8 rounded-[2.5rem] shadow-2xl border border-slate-100 text-center animate-fade-in">
-                                <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-full max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 text-center animate-fade-in">
+                                <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
                                     <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 </div>
-                                <h2 className="text-2xl font-black text-slate-800 mb-2">MESAJ KİLİTLİ</h2>
-                                <p className="text-slate-500 text-sm mb-8 italic">Bu mesaj {config.dateStr} tarihinde açılacaktır.</p>
+                                <h2 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">İÇERİK KİLİTLİ</h2>
+                                <p className="text-slate-500 text-sm mb-10 leading-relaxed italic">Bu özel mesaj <span className="font-bold text-indigo-600 underline decoration-indigo-100 underline-offset-4">{config.dateStr}</span> tarihinde açılacaktır.</p>
                                 <div className="space-y-4">
-                                    <input id="pw" type="text" placeholder="Şifreniz" className="w-full px-5 py-4 rounded-2xl border border-slate-200 text-center font-bold bg-slate-50 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all" />
-                                    <button onClick={() => checkPassword(document.getElementById('pw').value)} className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-indigo-600 transition-all shadow-lg active:scale-95">Şifreyle Aç</button>
+                                    <input id="pw" type="text" placeholder="Giriş Şifresi" className="w-full px-6 py-4 rounded-2xl border border-slate-200 text-center font-bold bg-slate-50 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" />
+                                    <button onClick={() => checkPassword(document.getElementById('pw').value)} className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-indigo-600 transition-all shadow-xl active:scale-95">Hemen Aç</button>
                                 </div>
                             </div>
                         )}
 
                         {view === 'unlocked' && (
-                            <div className="w-full bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden animate-fade-in">
-                                <div className="bg-indigo-600 p-4 text-center">
-                                    <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.3em]">Özel İleti</span>
+                            <div className="w-full bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden animate-fade-in">
+                                <div className="bg-slate-900 p-4 text-center">
+                                    <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.4em]">Secure Transmission</span>
                                 </div>
-                                <div className="p-12 md:p-20 text-center">
+                                <div className="p-16 md:p-24 text-center">
                                     <p className="text-slate-800 text-xl md:text-3xl leading-relaxed italic font-medium">"{message}"</p>
-                                    <div className="mt-12 h-px w-20 bg-slate-100 mx-auto"></div>
+                                    <div className="mt-14 h-px w-24 bg-gradient-to-r from-transparent via-slate-200 to-transparent mx-auto"></div>
                                 </div>
                             </div>
                         )}
 
                         {view === 'error' && (
-                            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl text-center max-w-sm border border-red-50 animate-fade-in">
+                            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl text-center max-w-md border border-red-50 animate-fade-in">
                                 <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
-                                <h1 className="text-slate-800 font-bold mb-2">Bağlantı Hatası</h1>
-                                <p className="text-slate-500 text-xs leading-relaxed mb-8">{error}</p>
-                                <button onClick={() => window.location.reload()} className="text-indigo-600 font-bold text-xs uppercase tracking-widest">Yeniden Dene</button>
+                                <h1 className="text-slate-800 font-bold mb-3 text-lg">Bağlantı Sorunu</h1>
+                                <p className="text-slate-500 text-xs leading-relaxed mb-6">{error.message}</p>
+                                
+                                <div className="flex flex-col space-y-3">
+                                    <button onClick={() => window.location.reload()} className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-all text-sm">Yeniden Dene</button>
+                                    
+                                    <button onClick={() => setShowDebug(!showDebug)} className="text-slate-400 font-bold text-[10px] uppercase tracking-widest hover:text-indigo-600 transition-colors">
+                                        {showDebug ? "Bilgileri Gizle" : "Tanılama Bilgilerini Göster"}
+                                    </button>
+                                </div>
+
+                                {showDebug && (
+                                    <div className="mt-6 text-left p-4 bg-slate-50 rounded-2xl border border-slate-100 animate-fade-in overflow-hidden">
+                                        <p className="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-tighter">Google Cloud'a Eklenmesi Gereken Adresler:</p>
+                                        <div className="space-y-1 font-mono text-[10px] text-indigo-600 break-all select-all">
+                                            <p>{window.location.origin}/*</p>
+                                            <p>{window.location.href.split('?')[0]}*</p>
+                                        </div>
+                                        <div className="mt-4 pt-4 border-t border-slate-200">
+                                             <p className="text-[9px] text-slate-400 font-medium">Hata Kodu: {error.status || 'N/A'}</p>
+                                             <pre className="mt-2 p-2 bg-slate-900 text-green-400 rounded text-[9px] overflow-x-auto">
+                                                {JSON.stringify(error.raw || 'Detay yok', null, 2)}
+                                             </pre>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        <div className="mt-12 text-slate-300 text-[9px] font-bold uppercase tracking-[0.4em]">Secure Messaging v1.7</div>
+                        <div className="mt-12 text-slate-300 text-[9px] font-bold uppercase tracking-[0.4em] select-none">Secure Messaging v1.8</div>
                     </div>
                 </div>
             );

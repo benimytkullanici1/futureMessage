@@ -13,6 +13,17 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        #root:empty::before {
+            content: 'Uygulama yükleniyor...';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #64748b;
+            font-size: 14px;
         }
     </style>
 <script type="importmap">
@@ -27,5 +38,7 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- index.tsx dosyasını burada açıkça çağırıyoruz -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@ import LockScreen from './components/LockScreen';
 import MessageDisplay from './components/MessageDisplay';
 
 const App: React.FC = () => {
-  const [status, setStatus] = useState<AppStatus>('idle');
+  const [status, setStatus] = useState<AppStatus>('loading');
   const [config, setConfig] = useState<MessageConfig | null>(null);
   const [message, setMessage] = useState<string>('');
   const [error, setError] = useState<AppError | null>(null);
@@ -28,13 +28,23 @@ const App: React.FC = () => {
   };
 
   const parseUrlParams = useCallback(() => {
+    // Protokol kontrolü (file:// üzerinden çalışmaz)
+    if (window.location.protocol === 'file:') {
+        setError({
+            title: 'Çalıştırma Hatası',
+            message: 'Bu uygulama güvenlik nedeniyle doğrudan dosyaya tıklanarak açılamaz. Lütfen bir web sunucusuna yükleyin veya yerel bir sunucu (localhost) kullanın.'
+        });
+        setStatus('error');
+        return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const d = urlParams.get('d');
 
     if (!d) {
       setError({
-        title: 'Geçersiz Link',
-        message: 'Bu sayfaya erişmek için geçerli bir parametre gereklidir.'
+        title: 'Bağlantı Eksik',
+        message: 'Görüntülenecek bir mesaj parametresi (d) bulunamadı. Lütfen size iletilen tam linki kullandığınızdan emin olun.'
       });
       setStatus('error');
       return;
@@ -45,7 +55,7 @@ const App: React.FC = () => {
       const parts = decoded.split(',');
       
       if (parts.length < 3) {
-        throw new Error('Eksik veri formatı detected.');
+        throw new Error('Veri formatı eksik veya hatalı.');
       }
 
       const parsedConfig: MessageConfig = {
@@ -58,7 +68,7 @@ const App: React.FC = () => {
       checkLockStatus(parsedConfig);
     } catch (err: any) {
       setError({
-        title: 'Parametre Hatası',
+        title: 'Geçersiz Link',
         message: err.message || 'Link yapısı bozulmuş olabilir.'
       });
       setStatus('error');
@@ -78,7 +88,7 @@ const App: React.FC = () => {
         setStatus('locked');
       }
     } catch (e: any) {
-      setError({ title: 'Sistem Hatası', message: 'Tarih hesaplanırken bir sorun oluştu.' });
+      setError({ title: 'Tarih Hatası', message: 'Tarih hesaplanırken bir sorun oluştu.' });
       setStatus('error');
     }
   };
@@ -91,8 +101,8 @@ const App: React.FC = () => {
       setStatus('unlocked');
     } catch (err: any) {
       setError({
-        title: 'Erişim Engellendi',
-        message: err.message || 'Veritabanı bağlantısı kurulamadı.'
+        title: 'Veri Hatası',
+        message: err.message || 'Mesaj veritabanından çekilemedi. API veya internet bağlantısını kontrol edin.'
       });
       setStatus('error');
     }
@@ -117,7 +127,7 @@ const App: React.FC = () => {
         {status === 'loading' && <Loader />}
 
         {status === 'error' && error && (
-          <div className="text-center space-y-6 max-w-md bg-white p-10 rounded-[2.5rem] shadow-xl border border-red-50 animate-fade-in" >
+          <div className="text-center space-y-6 max-w-md bg-white p-10 rounded-[2.5rem] shadow-xl border border-red-50 animate-in fade-in zoom-in duration-300" >
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -127,6 +137,12 @@ const App: React.FC = () => {
                 <h1 className="text-xl font-bold text-slate-800">{error.title}</h1>
                 <p className="text-slate-500 text-sm leading-relaxed">{error.message}</p>
             </div>
+            <button 
+                onClick={() => window.location.reload()}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+            >
+                Yeniden Dene
+            </button>
           </div>
         )}
 
@@ -142,7 +158,7 @@ const App: React.FC = () => {
         )}
         
         <div className="mt-12 text-slate-400 text-[9px] font-bold uppercase tracking-[0.3em] opacity-30 select-none">
-            End-to-End Secure Fetch &bull; v1.3
+            Secure Message Viewer &bull; v1.4
         </div>
       </div>
     </div>

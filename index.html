@@ -69,7 +69,7 @@
 
         <!-- 2. KİLİT EKRANI -->
         <div id="lock-screen" class="hidden w-full flex flex-col items-center animate-fade-in">
-            <p class="text-sm italic text-stone-400 serif mb-8">A message is waiting for its moment.</p>
+            <p class="text-base md:text-lg italic text-stone-400 serif mb-8">Some words are meant to be read at the right time.</p>
             
             <div class="bg-white w-full p-10 md:p-14 rounded-[2rem] card-shadow flex flex-col items-center text-center space-y-10">
                 <div class="space-y-4">
@@ -81,7 +81,7 @@
                     -- days · -- hours · -- minutes
                 </div>
 
-                <p class="text-sm italic text-stone-400 serif max-w-[240px] leading-relaxed">Some words are meant to be read at the right time.</p>
+                <p class="text-sm italic text-stone-400 serif max-w-[240px] leading-relaxed">Patience makes the discovery even more special.</p>
 
                 <div class="w-full max-w-[260px] pt-4 space-y-6">
                     <p class="text-xs serif italic text-stone-500">Have the secret word?</p>
@@ -111,9 +111,6 @@
                 <p id="message-text" class="text-stone-700 text-xl md:text-2xl leading-relaxed serif italic text-center">
                     <!-- Mesaj buraya gelecek -->
                 </p>
-                <div class="mt-16 text-right">
-                    <span class="text-stone-400 serif italic text-lg">— With love</span>
-                </div>
             </div>
         </div>
 
@@ -166,8 +163,6 @@
             const now = new Date();
             const diff = target - now;
 
-            // OTOMATİK AÇILMA MANTIĞI:
-            // Eğer süre dolduysa interval'ı temizle ve mesajı yükle
             if (diff <= 0) {
                 if (countdownInterval) clearInterval(countdownInterval);
                 loadAndShowMessage();
@@ -214,18 +209,12 @@
             const targetDate = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
             const now = new Date();
             
-            // Tarih kontrolü için saatleri sıfırlıyoruz (Sadece gün bazlı kontrol için)
-            // Eğer tam saat kontrolü isteseydin burayı güncellerdik.
-            const todayZero = new Date(); todayZero.setHours(0,0,0,0);
-            const targetZero = new Date(targetDate); targetZero.setHours(0,0,0,0);
-
             if (now >= targetDate) {
                 loadAndShowMessage();
             } else {
                 document.getElementById('target-date-display').innerText = formatToLongDate(config.date);
                 showScreen('lock-screen');
                 updateCountdown();
-                // Her 30 saniyede bir kontrol et (daha akıcı geçiş için)
                 countdownInterval = setInterval(updateCountdown, 30000);
             }
         }

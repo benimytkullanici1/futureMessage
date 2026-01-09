@@ -52,8 +52,8 @@
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
@@ -67,7 +67,7 @@
             <div class="w-6 h-6 border-[1.5px] border-stone-200 border-t-stone-400 rounded-full animate-spin"></div>
         </div>
 
-        <!-- 2. KİLİT EKRANI (KART İÇİNDE) -->
+        <!-- 2. KİLİT EKRANI -->
         <div id="lock-screen" class="hidden w-full flex flex-col items-center animate-fade-in">
             <p class="text-sm italic text-stone-400 serif mb-8">A message is waiting for its moment.</p>
             
@@ -115,8 +115,6 @@
                     <span class="text-stone-400 serif italic text-lg">— With love</span>
                 </div>
             </div>
-
-            <p class="mt-8 text-sm italic text-stone-300 serif">Some messages are not meant to be rushed.</p>
         </div>
 
         <!-- 4. HATA EKRANI -->
@@ -168,8 +166,10 @@
             const now = new Date();
             const diff = target - now;
 
+            // OTOMATİK AÇILMA MANTIĞI:
+            // Eğer süre dolduysa interval'ı temizle ve mesajı yükle
             if (diff <= 0) {
-                clearInterval(countdownInterval);
+                if (countdownInterval) clearInterval(countdownInterval);
                 loadAndShowMessage();
                 return;
             }
@@ -178,7 +178,10 @@
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             
-            document.getElementById('countdown').innerText = `${days} days · ${hours} hours · ${minutes} minutes`;
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                countdownEl.innerText = `${days} days · ${hours} hours · ${minutes} minutes`;
+            }
         }
 
         async function fetchSheetMessage(row) {
@@ -210,7 +213,11 @@
             const p = config.date.split('.');
             const targetDate = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
             const now = new Date();
-            now.setHours(0,0,0,0); targetDate.setHours(0,0,0,0);
+            
+            // Tarih kontrolü için saatleri sıfırlıyoruz (Sadece gün bazlı kontrol için)
+            // Eğer tam saat kontrolü isteseydin burayı güncellerdik.
+            const todayZero = new Date(); todayZero.setHours(0,0,0,0);
+            const targetZero = new Date(targetDate); targetZero.setHours(0,0,0,0);
 
             if (now >= targetDate) {
                 loadAndShowMessage();
@@ -218,7 +225,8 @@
                 document.getElementById('target-date-display').innerText = formatToLongDate(config.date);
                 showScreen('lock-screen');
                 updateCountdown();
-                countdownInterval = setInterval(updateCountdown, 60000);
+                // Her 30 saniyede bir kontrol et (daha akıcı geçiş için)
+                countdownInterval = setInterval(updateCountdown, 30000);
             }
         }
 

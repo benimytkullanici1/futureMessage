@@ -12,9 +12,11 @@
     <style>
         :root {
             --bg-color: #faf9f6;
+            --card-bg: #ffffff;
             --text-main: #4a4a4a;
             --text-muted: #8c8c8c;
-            --accent: #a68b7c;
+            --accent-soft: #f2f0e9;
+            --accent-border: #e8e5d8;
         }
         body { 
             font-family: 'Inter', sans-serif; 
@@ -24,96 +26,104 @@
             padding: 0; 
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
         .serif { font-family: 'Playfair Display', serif; }
         .hidden { display: none !important; }
-        .animate-fade-in { animation: fadeIn 1s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 1.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
         .card-shadow {
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.03), 0 5px 15px rgba(0, 0, 0, 0.01);
         }
         input::placeholder { color: #d1d1d1; font-style: italic; }
+        
+        .subtle-button {
+            background-color: var(--accent-soft);
+            color: #7a756b;
+            transition: all 0.3s ease;
+        }
+        .subtle-button:hover {
+            background-color: var(--accent-border);
+            color: #5a564e;
+        }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
   }
 }
 </script>
 </head>
-<body>
+<body class="pt-24 pb-12">
 
-    <div id="app-container" class="w-full max-w-xl px-6 py-12 flex flex-col items-center min-h-screen justify-center">
+    <div id="app-container" class="w-full max-w-xl px-6 flex flex-col items-center">
         
         <!-- 1. YÜKLENİYOR -->
         <div id="loader" class="flex flex-col items-center justify-center p-12 animate-fade-in">
-            <div class="w-8 h-8 border-2 border-stone-200 border-t-stone-400 rounded-full animate-spin"></div>
+            <div class="w-6 h-6 border-[1.5px] border-stone-200 border-t-stone-400 rounded-full animate-spin"></div>
         </div>
 
-        <!-- 2. KİLİT EKRANI -->
-        <div id="lock-screen" class="hidden w-full flex flex-col items-center text-center space-y-8 animate-fade-in">
-            <!-- Hourglass Icon -->
-            <div class="mb-2 opacity-40">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 2h14M5 22h14M12 12l-7-7V2h14v3l-7 7zM12 12l7 7v3H5v-3l7-7z"/>
-                </svg>
-            </div>
+        <!-- 2. KİLİT EKRANI (KART İÇİNDE) -->
+        <div id="lock-screen" class="hidden w-full flex flex-col items-center animate-fade-in">
+            <p class="text-sm italic text-stone-400 serif mb-8">A message is waiting for its moment.</p>
             
-            <p class="text-sm italic text-stone-400 serif">A message is waiting for its moment.</p>
-            
-            <div class="space-y-4">
-                <h2 class="text-xl serif italic text-stone-600">This message will open on</h2>
-                <h1 id="target-date-display" class="text-4xl md:text-5xl serif text-stone-800 tracking-tight">-- Month ----</h1>
-            </div>
+            <div class="bg-white w-full p-10 md:p-14 rounded-[2rem] card-shadow flex flex-col items-center text-center space-y-10">
+                <div class="space-y-4">
+                    <h2 class="text-sm serif italic text-stone-400 tracking-wide">This message will open on</h2>
+                    <h1 id="target-date-display" class="text-3xl md:text-4xl serif text-stone-800 tracking-tight">-- Month ----</h1>
+                </div>
 
-            <p class="text-sm italic text-stone-400 serif max-w-[240px]">Some words are meant to be read at the right time.</p>
+                <div id="countdown" class="text-stone-400 text-[11px] font-medium tracking-[0.15em] uppercase py-3 border-y border-stone-50 w-full max-w-[240px]">
+                    -- days · -- hours · -- minutes
+                </div>
 
-            <!-- Countdown -->
-            <div id="countdown" class="text-stone-500 text-sm font-light tracking-wide py-4 border-y border-stone-100 w-full max-w-[280px]">
-                Loading timer...
-            </div>
+                <p class="text-sm italic text-stone-400 serif max-w-[240px] leading-relaxed">Some words are meant to be read at the right time.</p>
 
-            <!-- Secret Word Section -->
-            <div class="w-full max-w-[300px] pt-4 space-y-6">
-                <p class="serif italic text-stone-600">Have the secret word?</p>
-                <form id="bypass-form" class="space-y-4">
-                    <input
-                        type="text"
-                        id="bypass-input"
-                        placeholder="Enter secret word"
-                        class="w-full bg-transparent border border-stone-200 px-4 py-3 rounded-md text-center focus:outline-none focus:border-stone-400 transition-colors text-sm"
-                    />
-                    <p class="text-[10px] text-stone-400 italic">Only if you were trusted with it.</p>
-                </form>
+                <div class="w-full max-w-[260px] pt-4 space-y-6">
+                    <p class="text-xs serif italic text-stone-500">Have the secret word?</p>
+                    <form id="bypass-form" class="space-y-3">
+                        <input
+                            type="text"
+                            id="bypass-input"
+                            placeholder="Enter secret word"
+                            class="w-full bg-stone-50/50 border border-stone-100 px-4 py-3 rounded-xl text-center focus:outline-none focus:border-stone-200 transition-colors text-sm"
+                        />
+                        <button
+                            type="submit"
+                            class="w-full subtle-button py-3 rounded-xl text-xs font-semibold tracking-widest uppercase"
+                        >
+                            Reveal Message
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
         <!-- 3. MESAJ EKRANI -->
-        <div id="message-screen" class="hidden w-full flex flex-col items-center animate-fade-in space-y-12">
-            <p class="text-sm italic text-stone-400 serif">This message was written for you.</p>
+        <div id="message-screen" class="hidden w-full flex flex-col items-center animate-fade-in">
+            <p class="text-sm italic text-stone-400 serif mb-8">This message was written for you.</p>
             
-            <div class="bg-white w-full p-10 md:p-16 rounded-2xl card-shadow relative">
+            <div class="bg-white w-full p-12 md:p-20 rounded-[2rem] card-shadow relative">
                 <p id="message-text" class="text-stone-700 text-xl md:text-2xl leading-relaxed serif italic text-center">
                     <!-- Mesaj buraya gelecek -->
                 </p>
-                <div class="mt-12 text-right">
+                <div class="mt-16 text-right">
                     <span class="text-stone-400 serif italic text-lg">— With love</span>
                 </div>
             </div>
 
-            <p class="text-sm italic text-stone-300 serif">Some messages are not meant to be rushed.</p>
+            <p class="mt-8 text-sm italic text-stone-300 serif">Some messages are not meant to be rushed.</p>
         </div>
 
         <!-- 4. HATA EKRANI -->
-        <div id="error-screen" class="hidden text-center space-y-4 animate-fade-in">
-            <h1 class="text-xl serif italic text-stone-800">Something went wrong</h1>
+        <div id="error-screen" class="hidden text-center space-y-4 animate-fade-in mt-12">
+            <h1 class="text-lg serif italic text-stone-800">Something went wrong</h1>
             <p id="error-message" class="text-stone-400 text-sm">The link seems to be broken.</p>
-            <button onclick="window.location.reload()" class="text-xs uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors">Retry</button>
+            <button onclick="window.location.reload()" class="text-[10px] uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors pt-4">Retry</button>
         </div>
 
     </div>
@@ -138,7 +148,7 @@
                 const decoded = decodeURIComponent(escape(atob(base64Str)));
                 const parts = decoded.split(',');
                 return {
-                    date: parts[0], // dd.mm.yyyy
+                    date: parts[0], 
                     secret: parts[1],
                     row: parseInt(parts[2])
                 };

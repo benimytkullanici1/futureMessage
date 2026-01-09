@@ -4,16 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sana Özel Bir Sürpriz</title>
-    <!-- Stil ve Fontlar -->
+    <title>A Message for You</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:italic,wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:italic,wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #faf9f6;
+            --text-main: #4a4a4a;
+            --text-muted: #8c8c8c;
+            --accent: #a68b7c;
+        }
         body { 
             font-family: 'Inter', sans-serif; 
-            background: radial-gradient(circle at center, #fffafa 0%, #fdf2f8 100%);
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0; 
             padding: 0; 
             min-height: 100vh;
@@ -23,8 +29,13 @@
         }
         .serif { font-family: 'Playfair Display', serif; }
         .hidden { display: none !important; }
-        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 1s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card-shadow {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.04);
+        }
+        input::placeholder { color: #d1d1d1; font-style: italic; }
     </style>
 <script type="importmap">
 {
@@ -37,92 +48,84 @@
 </head>
 <body>
 
-    <div id="app-container" class="w-full max-w-4xl px-4 py-12 flex flex-col items-center">
+    <div id="app-container" class="w-full max-w-xl px-6 py-12 flex flex-col items-center min-h-screen justify-center">
         
-        <!-- 1. YÜKLENİYOR EKRANI -->
+        <!-- 1. YÜKLENİYOR -->
         <div id="loader" class="flex flex-col items-center justify-center p-12 animate-fade-in">
-            <div class="relative w-12 h-12">
-                <div class="absolute top-0 left-0 w-full h-full border-2 border-rose-100 rounded-full"></div>
-                <div class="absolute top-0 left-0 w-full h-full border-2 border-rose-400 rounded-full border-t-transparent animate-spin"></div>
-            </div>
-            <p class="mt-6 text-rose-400 font-medium italic serif text-lg">Sürprizin hazırlanıyor...</p>
+            <div class="w-8 h-8 border-2 border-stone-200 border-t-stone-400 rounded-full animate-spin"></div>
         </div>
 
-        <!-- 2. KİLİT EKRANI (TARİH GELMEDİYSE) -->
-        <div id="lock-screen" class="hidden w-full max-w-md mx-auto text-center space-y-12 animate-fade-in">
-            <div class="space-y-6">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-sm border border-rose-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" strokeLinejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <div class="space-y-3">
-                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight serif italic">Bir Sürpriz Bekliyor</h2>
-                    <p class="text-slate-500 leading-relaxed text-sm">
-                        Bu özel mesaj şu tarihte senin için açılacak: <br/>
-                        <span id="target-date-display" class="font-bold text-rose-500 border-b border-rose-100 pb-0.5">...</span>
-                    </p>
-                </div>
+        <!-- 2. KİLİT EKRANI -->
+        <div id="lock-screen" class="hidden w-full flex flex-col items-center text-center space-y-8 animate-fade-in">
+            <!-- Hourglass Icon -->
+            <div class="mb-2 opacity-40">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 2h14M5 22h14M12 12l-7-7V2h14v3l-7 7zM12 12l7 7v3H5v-3l7-7z"/>
+                </svg>
+            </div>
+            
+            <p class="text-sm italic text-stone-400 serif">A message is waiting for its moment.</p>
+            
+            <div class="space-y-4">
+                <h2 class="text-xl serif italic text-stone-600">This message will open on</h2>
+                <h1 id="target-date-display" class="text-4xl md:text-5xl serif text-stone-800 tracking-tight">-- Month ----</h1>
             </div>
 
-            <div class="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border border-white shadow-[0_30px_60px_-12px_rgba(244,114,182,0.15)] space-y-6">
+            <p class="text-sm italic text-stone-400 serif max-w-[240px]">Some words are meant to be read at the right time.</p>
+
+            <!-- Countdown -->
+            <div id="countdown" class="text-stone-500 text-sm font-light tracking-wide py-4 border-y border-stone-100 w-full max-w-[280px]">
+                Loading timer...
+            </div>
+
+            <!-- Secret Word Section -->
+            <div class="w-full max-w-[300px] pt-4 space-y-6">
+                <p class="serif italic text-stone-600">Have the secret word?</p>
                 <form id="bypass-form" class="space-y-4">
                     <input
                         type="text"
                         id="bypass-input"
-                        placeholder="Erişim Kodunu Girin"
-                        class="w-full px-6 py-4 rounded-2xl border border-rose-50 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-200 transition-all text-center font-medium placeholder:text-slate-200 bg-white/50"
+                        placeholder="Enter secret word"
+                        class="w-full bg-transparent border border-stone-200 px-4 py-3 rounded-md text-center focus:outline-none focus:border-stone-400 transition-colors text-sm"
                     />
-                    <button
-                        type="submit"
-                        class="w-full bg-rose-500 text-white font-bold py-4 rounded-2xl hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-100"
-                    >
-                        Mesajımı Aç
-                    </button>
+                    <p class="text-[10px] text-stone-400 italic">Only if you were trusted with it.</p>
                 </form>
-                <p class="text-[10px] text-slate-300 uppercase tracking-widest font-bold opacity-60 italic serif">Kod ile erken erişim</p>
             </div>
         </div>
 
         <!-- 3. MESAJ EKRANI -->
-        <div id="message-screen" class="hidden w-full max-w-2xl mx-auto animate-fade-in">
-            <div class="bg-white rounded-[3rem] border border-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] overflow-hidden">
-                <div class="bg-rose-50/30 py-4 text-center">
-                    <span class="text-rose-300 text-[9px] font-bold uppercase tracking-[0.5em]">Sadece Senin İçin</span>
-                </div>
-                <div class="p-12 md:p-24 text-center">
-                    <p id="message-text" class="text-slate-800 text-2xl md:text-3xl lg:text-4xl leading-relaxed whitespace-pre-wrap font-medium italic serif">
-                        <!-- Mesaj buraya gelecek -->
-                    </p>
-                    <div class="mt-16 flex justify-center items-center space-x-3">
-                        <div class="h-px w-10 bg-rose-100"></div>
-                        <div class="w-1.5 h-1.5 rounded-full bg-rose-200"></div>
-                        <div class="h-px w-10 bg-rose-100"></div>
-                    </div>
+        <div id="message-screen" class="hidden w-full flex flex-col items-center animate-fade-in space-y-12">
+            <p class="text-sm italic text-stone-400 serif">This message was written for you.</p>
+            
+            <div class="bg-white w-full p-10 md:p-16 rounded-2xl card-shadow relative">
+                <p id="message-text" class="text-stone-700 text-xl md:text-2xl leading-relaxed serif italic text-center">
+                    <!-- Mesaj buraya gelecek -->
+                </p>
+                <div class="mt-12 text-right">
+                    <span class="text-stone-400 serif italic text-lg">— With love</span>
                 </div>
             </div>
-            <p class="mt-8 text-center text-rose-300 serif italic text-sm opacity-60">Sevgiyle hazırlandı</p>
+
+            <p class="text-sm italic text-stone-300 serif">Some messages are not meant to be rushed.</p>
         </div>
 
         <!-- 4. HATA EKRANI -->
-        <div id="error-screen" class="hidden text-center p-12 bg-white rounded-[3rem] shadow-sm border border-rose-50 animate-fade-in max-w-sm">
-            <h1 class="text-xl font-bold text-slate-800 mb-2 serif italic">Bir Hata Oluştu</h1>
-            <p id="error-message" class="text-slate-400 text-sm mb-8 leading-relaxed">Bağlantınız hatalı görünüyor.</p>
-            <button onclick="window.location.reload()" class="text-[10px] font-bold text-rose-400 uppercase tracking-[0.3em]">Yenile</button>
+        <div id="error-screen" class="hidden text-center space-y-4 animate-fade-in">
+            <h1 class="text-xl serif italic text-stone-800">Something went wrong</h1>
+            <p id="error-message" class="text-stone-400 text-sm">The link seems to be broken.</p>
+            <button onclick="window.location.reload()" class="text-xs uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors">Retry</button>
         </div>
 
     </div>
 
     <script>
-        // --- AYARLAR ---
         const API_KEY = 'AIzaSyCoA5LPL8NHfXhzbSbVzJc9r6naEKXUogU'; 
         const SHEET_ID = '1lc3pmmVZVSq_qf6w50ZSHKBW0sd9IV9w58cj1MTHkuY';
         const SHEET_NAME = 'Sheet1';
 
-        // --- GLOBAL DEĞİŞKENLER ---
         let config = null;
+        let countdownInterval = null;
 
-        // --- YARDIMCI FONKSİYONLAR ---
         function showScreen(screenId) {
             ['loader', 'lock-screen', 'message-screen', 'error-screen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -135,49 +138,65 @@
                 const decoded = decodeURIComponent(escape(atob(base64Str)));
                 const parts = decoded.split(',');
                 return {
-                    date: parts[0],
+                    date: parts[0], // dd.mm.yyyy
                     secret: parts[1],
                     row: parseInt(parts[2])
                 };
-            } catch (e) {
-                return null;
+            } catch (e) { return null; }
+        }
+
+        function formatToLongDate(dateStr) {
+            const p = dateStr.split('.');
+            const d = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function updateCountdown() {
+            if (!config) return;
+            const p = config.date.split('.');
+            const target = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+            const now = new Date();
+            const diff = target - now;
+
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                loadAndShowMessage();
+                return;
             }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('countdown').innerText = `${days} days · ${hours} hours · ${minutes} minutes`;
         }
 
         async function fetchSheetMessage(row) {
             const range = `${SHEET_NAME}!B${row}:B${row}`;
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.values && data.values[0]) {
-                    return data.values[0][0];
-                }
-                throw new Error('Mesaj boş');
-            } catch (err) {
-                throw err;
-            }
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.values && data.values[0]) return data.values[0][0];
+            throw new Error('Empty');
         }
 
-        // --- ANA MANTIK ---
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const d = params.get('d');
 
             if (!d) {
-                document.getElementById('error-message').innerText = "Link eksik veya hatalı.";
+                document.getElementById('error-message').innerText = "Link is missing.";
                 showScreen('error-screen');
                 return;
             }
 
             config = decodeData(d);
             if (!config) {
-                document.getElementById('error-message').innerText = "Link verisi okunamadı.";
+                document.getElementById('error-message').innerText = "Corrupted link data.";
                 showScreen('error-screen');
                 return;
             }
 
-            // Tarih Kontrolü
             const p = config.date.split('.');
             const targetDate = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
             const now = new Date();
@@ -186,8 +205,10 @@
             if (now >= targetDate) {
                 loadAndShowMessage();
             } else {
-                document.getElementById('target-date-display').innerText = config.date;
+                document.getElementById('target-date-display').innerText = formatToLongDate(config.date);
                 showScreen('lock-screen');
+                updateCountdown();
+                countdownInterval = setInterval(updateCountdown, 60000);
             }
         }
 
@@ -198,23 +219,21 @@
                 document.getElementById('message-text').innerText = msg;
                 showScreen('message-screen');
             } catch (err) {
-                document.getElementById('error-message').innerText = "Mesaj veritabanından alınamadı.";
+                document.getElementById('error-message').innerText = "Could not fetch the message.";
                 showScreen('error-screen');
             }
         }
 
-        // --- EVENT LISTENERS ---
         document.getElementById('bypass-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('bypass-input').value.trim().toLowerCase();
             if (input === config.secret.trim().toLowerCase()) {
                 loadAndShowMessage();
             } else {
-                alert('Hatalı kod. Lütfen tekrar deneyin.');
+                alert('That is not the secret word.');
             }
         });
 
-        // Başlat
         window.onload = init;
     </script>
 </body>

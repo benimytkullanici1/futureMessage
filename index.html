@@ -1,62 +1,54 @@
 
 <!DOCTYPE html>
-<html lang="tr" class="overflow-x-hidden">
+<html lang="tr" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Birincil Meta Etiketleri -->
+    <!-- Standart Meta Etiketleri -->
     <title>A Special Message for You</title>
-    <meta name="title" content="A Special Message for You">
-    <meta name="description" content="I have a special message for you, but it will open only when the time comes. Waiting makes it more meaningful.">
+    <meta name="description" content="I have a special message for you, but it will open only when the time is right.">
 
-    <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="">
+    <!-- Open Graph (WhatsApp & Facebook) -->
     <meta property="og:title" content="A Special Message for You ✨">
     <meta property="og:description" content="I have a special message for you, but it will open only when the time comes. Waiting makes it more meaningful.">
     <meta property="og:image" content="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1000&auto=format&fit=crop">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Special Message">
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="A Special Message for You ✨">
-    <meta property="twitter:description" content="I have a special message for you, but it will open only when the time comes.">
-    <meta property="twitter:image" content="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1000&auto=format&fit=crop">
+    <!-- Schema.org (Google & WhatsApp için alternatif) -->
+    <meta itemprop="name" content="A Special Message for You ✨">
+    <meta itemprop="description" content="I have a special message for you, but it will open only when the time comes.">
+    <meta itemprop="image" content="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1000&auto=format&fit=crop">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:italic,wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg-color: #faf9f6;
-            --card-bg: #ffffff;
             --text-main: #4a4a4a;
-            --text-muted: #8c8c8c;
             --accent-soft: #f2f0e9;
             --accent-border: #e8e5d8;
         }
         
-        html {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        html::-webkit-scrollbar {
-            display: none;
-        }
+        html { scrollbar-width: none; -ms-overflow-style: none; }
+        html::-webkit-scrollbar { display: none; }
 
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-color);
             color: var(--text-main);
-            margin: 0; 
-            padding: 0; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-            width: 100%;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -77,8 +69,6 @@
             box-shadow: 0 15px 50px -10px rgba(0, 0, 0, 0.05), 0 5px 15px -5px rgba(0, 0, 0, 0.02);
         }
 
-        input::placeholder { color: #d1d1d1; font-style: italic; }
-        
         .subtle-button {
             background-color: var(--accent-soft);
             color: #7a756b;
@@ -88,8 +78,6 @@
             background-color: var(--accent-border);
             color: #5a564e;
         }
-
-        * { box-sizing: border-box; }
     </style>
 <script type="importmap">
 {
@@ -112,34 +100,31 @@
         <!-- 2. KİLİT EKRANI -->
         <div id="lock-screen" class="hidden w-full flex flex-col items-center animate-fade-in">
             <div class="w-full text-center mb-10 px-4">
-                <p class="text-base md:text-lg italic text-stone-400 serif leading-tight inline-block w-full">
+                <p class="text-base md:text-lg italic text-stone-400 serif leading-tight">
                     Some words are meant to be read at the right time.
                 </p>
             </div>
             
             <div class="bg-white w-full p-8 md:p-14 rounded-[2rem] card-shadow flex flex-col items-center text-center space-y-10">
-                <div class="space-y-4 w-full">
-                    <h2 class="text-sm serif italic text-stone-400 tracking-wide w-full text-center">This message will open on</h2>
-                    <h1 id="target-date-display" class="text-2xl md:text-4xl serif text-stone-800 tracking-tight w-full text-center">-- Month ----</h1>
+                <div class="space-y-4">
+                    <h2 class="text-sm serif italic text-stone-400 tracking-wide">This message will open on</h2>
+                    <h1 id="target-date-display" class="text-2xl md:text-4xl serif text-stone-800 tracking-tight">-- Month ----</h1>
                 </div>
 
-                <div id="countdown" class="text-stone-400 text-[10px] md:text-[11px] font-medium tracking-[0.15em] uppercase py-3 border-y border-stone-50 w-full max-w-[240px] text-center mx-auto">
+                <div id="countdown" class="text-stone-400 text-[10px] md:text-[11px] font-medium tracking-[0.15em] uppercase py-3 border-y border-stone-50 w-full max-w-[240px]">
                     -- days · -- hours · -- minutes
                 </div>
 
-                <div class="w-full max-w-[260px] pt-4 space-y-6 mx-auto">
-                    <p class="text-xs serif italic text-stone-500 w-full text-center">Have the secret word?</p>
-                    <form id="bypass-form" class="space-y-3 w-full">
+                <div class="w-full max-w-[260px] pt-4 space-y-6">
+                    <p class="text-xs serif italic text-stone-500">Have the secret word?</p>
+                    <form id="bypass-form" class="space-y-3">
                         <input
                             type="text"
                             id="bypass-input"
                             placeholder="Enter the secret word"
-                            class="w-full bg-stone-50/50 border border-stone-100 px-4 py-3 rounded-xl text-center focus:outline-none focus:border-stone-200 transition-colors text-sm appearance-none"
+                            class="w-full bg-stone-50/50 border border-stone-100 px-4 py-3 rounded-xl text-center focus:outline-none focus:border-stone-200 transition-colors text-sm"
                         />
-                        <button
-                            type="submit"
-                            class="w-full subtle-button py-3 rounded-xl text-xs font-semibold tracking-widest active:scale-95 transition-transform"
-                        >
+                        <button type="submit" class="w-full subtle-button py-3 rounded-xl text-xs font-semibold tracking-widest active:scale-95 transition-transform">
                             Reveal Message
                         </button>
                     </form>
@@ -150,13 +135,10 @@
         <!-- 3. MESAJ EKRANI -->
         <div id="message-screen" class="hidden w-full flex flex-col items-center animate-fade-in">
             <div class="w-full text-center mb-10">
-                <p class="text-sm italic text-stone-400 serif inline-block">This message was written for you.</p>
+                <p class="text-sm italic text-stone-400 serif">This message was written for you.</p>
             </div>
-            
-            <div class="bg-white w-full p-10 md:p-20 rounded-[2rem] card-shadow relative">
-                <p id="message-text" class="text-stone-700 text-lg md:text-2xl leading-relaxed serif italic text-center w-full">
-                    <!-- Mesaj buraya gelecek -->
-                </p>
+            <div class="bg-white w-full p-10 md:p-20 rounded-[2rem] card-shadow">
+                <p id="message-text" class="text-stone-700 text-lg md:text-2xl leading-relaxed serif italic text-center whitespace-pre-wrap"></p>
             </div>
         </div>
 
@@ -167,9 +149,9 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
-            <h1 class="text-lg serif italic text-stone-800 w-full text-center">Access Denied</h1>
-            <p id="error-message" class="text-stone-400 text-sm w-full text-center px-8">The link seems to be broken or incorrect.</p>
-            <button onclick="window.location.reload()" class="text-[10px] uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors pt-4 block mx-auto">Retry</button>
+            <h1 class="text-lg serif italic text-stone-800">Access Denied</h1>
+            <p id="error-message" class="text-stone-400 text-sm px-8">The link seems to be broken or incorrect.</p>
+            <button onclick="window.location.reload()" class="text-[10px] uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors pt-4">Retry</button>
         </div>
 
     </div>
@@ -194,10 +176,7 @@
                 const decoded = decodeURIComponent(escape(atob(base64Str)));
                 const parts = decoded.split(',');
                 if (parts.length < 2) return null;
-                return {
-                    row: parseInt(parts[0]),
-                    name: parts[1].trim()
-                };
+                return { row: parseInt(parts[0]), name: parts[1].trim() };
             } catch (e) { return null; }
         }
 
@@ -226,14 +205,11 @@
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            
-            const countdownEl = document.getElementById('countdown');
-            if (countdownEl) {
-                countdownEl.innerText = `${days} days · ${hours} hours · ${minutes} minutes`;
-            }
+            document.getElementById('countdown').innerText = `${days} days · ${hours} hours · ${minutes} minutes`;
         }
 
         async function fetchSheetRow(rowNumber) {
+            // A: İsim, B: Tarih, C: Şifre, D: Mesaj
             const range = `${SHEET_NAME}!A${rowNumber}:D${rowNumber}`;
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
             const response = await fetch(url);
@@ -271,6 +247,7 @@
             try {
                 const sheetData = await fetchSheetRow(urlData.row);
                 
+                // İsim Doğrulaması (A Kolonu vs URL'deki isim)
                 if (sheetData.name.toLowerCase() !== urlData.name.toLowerCase()) {
                     document.getElementById('error-message').innerText = "This link does not match our records. Please check the URL.";
                     showScreen('error-screen');
@@ -278,7 +255,6 @@
                 }
 
                 config = { ...urlData, ...sheetData };
-
                 const p = config.targetDate.split('.');
                 const targetDate = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
                 const now = new Date();
@@ -293,7 +269,7 @@
                     countdownInterval = setInterval(updateCountdown, 30000);
                 }
             } catch (err) {
-                document.getElementById('error-message').innerText = "Information could not be retrieved from the database.";
+                document.getElementById('error-message').innerText = "The link is incorrect or the database is unreachable.";
                 showScreen('error-screen');
             }
         }

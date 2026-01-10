@@ -4,7 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Message for You</title>
+    
+    <!-- Birincil Meta Etiketleri -->
+    <title>A Special Message for You</title>
+    <meta name="title" content="A Special Message for You">
+    <meta name="description" content="I have a special message for you, but it will open only when the time comes. Waiting makes it more meaningful.">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="A Special Message for You ✨">
+    <meta property="og:description" content="I have a special message for you, but it will open only when the time comes. Waiting makes it more meaningful.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1000&auto=format&fit=crop">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="A Special Message for You ✨">
+    <meta property="twitter:description" content="I have a special message for you, but it will open only when the time comes.">
+    <meta property="twitter:image" content="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1000&auto=format&fit=crop">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,8 +94,8 @@
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
@@ -216,7 +234,6 @@
         }
 
         async function fetchSheetRow(rowNumber) {
-            // A: İsim, B: Tarih, C: Şifre, D: Mesaj
             const range = `${SHEET_NAME}!A${rowNumber}:D${rowNumber}`;
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
             const response = await fetch(url);
@@ -254,7 +271,6 @@
             try {
                 const sheetData = await fetchSheetRow(urlData.row);
                 
-                // İsim Doğrulaması (A Kolonu vs URL'deki isim)
                 if (sheetData.name.toLowerCase() !== urlData.name.toLowerCase()) {
                     document.getElementById('error-message').innerText = "This link does not match our records. Please check the URL.";
                     showScreen('error-screen');
